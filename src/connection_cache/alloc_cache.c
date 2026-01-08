@@ -530,8 +530,28 @@ spatialite_alloc_reentrant ()
      */
     if (getenv ("PROJ_DATA") != NULL)
       {
+      char * projcheck = getenv("PROJ_DATA");
+      int plen = strlen(projcheck);
+      int inQuote = 0;
+      char * rQ = NULL;
+      if (plen > 2)
+      {
+          if((projcheck[0] == '\"') && (projcheck[plen-1] == '\"'))
+          {
+              inQuote = 1;
+              rQ = malloc(plen+1);
+              rQ = strcpy(rQ, projcheck+1);
+              rQ[plen-2] = 0;
+          }
+      }
+      if(inQuote)
+      { 
+          proj_db = sqlite3_mprintf("%s\\proj.db", rQ);
+          free(rQ);
+      }
+      else
 	  /* searching first for PROJ_DATA */
-	  proj_db = sqlite3_mprintf ("%s/proj.db", getenv ("PROJ_DATA"));
+	    proj_db = sqlite3_mprintf ("%s/proj.db", getenv ("PROJ_DATA"));
 #ifdef _WIN32
 	  is_proj_data = 1;
 #endif
